@@ -1,0 +1,28 @@
+#!/bin/bash
+
+usage() { echo "Usage: $0 [-a <i|u>] [-p <product>]" 1>&2; exit 1; }
+
+while getopts ":a:p:" o; do
+    case "${o}" in
+        a)
+            action=${OPTARG}
+            if [[ ${action:0:1} != "i" ]] && [[ ${action:0:1} != "u" ]]; then usage; fi
+            ;;
+        p)
+            product=${OPTARG}
+            ;;
+        *)
+            echo usage
+            ;;
+    esac
+done
+
+shift $((OPTIND-1))
+
+if [ -z "${action}" ] || [ -z "${product}" ]; then
+    echo fuck
+    usage
+else
+	echo "action=$action, product=$product"
+fi
+

@@ -1,5 +1,11 @@
 #!/bin/bash
 
 source common.sh
-
-java -jar -D64 $IMAGE_HOME/fmw_12.2.1.2.0_coherence.jar -silent -responseFile $APP_HOME/$ORACLE_PRODUCT/resp -invPtrLoc $APP_HOME/$ORACLE_PRODUCT/loc
+if [[ -x "products/$1.sh" ]]
+then
+	source "products/$1.sh"
+	$JAVA_HOME/bin/java -jar -D64 $ORACLE_IMAGE -silent -responseFile /tmp/inst_resp -invPtrLoc /tmp/inventory_loc
+else
+	echo "Unsupported Oracle product:$1"
+	exit -1
+fi
