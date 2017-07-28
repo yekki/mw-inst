@@ -1,3 +1,4 @@
+#!/bin/bash
 cat > /tmp/uninst_resp <<- UNINST_RESP
 [ENGINE]
 

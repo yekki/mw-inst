@@ -1,18 +1,35 @@
 #!/bin/bash
 
-usage() { echo "Usage: $0 [-a <i|u>] [-p <product>]" 1>&2; exit 1; }
+ORACLE_HOME=/Users/gniu/Oracle/mw
+#ORACLE_IMAGE=/Users/gniu/fmw_12.2.1.2.0_wls.jar
+ORACLE_IMAGE=/Users/gniu/fmw_12.2.1.2.0_coherence.jar
+ORACLE_INVENTORY_LOC=/Users/gniu/Oracle/.oraInventory
+ORACLE_INST_USER=gniu
+ORACLE_INST_GROUP=staff
+#JAVA_HOME=/usr/java/default
+JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_141.jdk/Contents/Home
+APP_HOME=/Users/gniu/Dropbox/Workbench/mw-inst
+
+DOMAIN_NAME='my_domain'
+
+cat > /tmp/inventory_loc <<- INVENTORY_LOC
+inventory_loc=$ORACLE_INVENTORY_LOC
+inst_group=$ORACLE_INST_GROUP
+INVENTORY_LOC
+
+usage() { echo "Usage: $0 [-a <i|u|d>] [-p <product>]" 1>&2; exit 1; }
 
 while getopts ":a:p:" o; do
     case "${o}" in
         a)
             action=${OPTARG}
-            if [[ ${action:0:1} != "i" ]] && [[ ${action:0:1} != "u" ]]; then usage; fi
+            if [[ ${action:0:1} == "d" ]]; then product=domain; fi
             ;;
         p)
             product=${OPTARG}
             ;;
         *)
-            echo usage
+            usage
             ;;
     esac
 done
@@ -20,9 +37,23 @@ done
 shift $((OPTIND-1))
 
 if [ -z "${action}" ] || [ -z "${product}" ]; then
-    echo fuck
     usage
 else
-	echo "action=$action, product=$product"
+	if [[ -x "products/${product}.sh" ]]
+	then
+		source "products/${product}.sh"
+
+		if [[ ${action:0:1} == "i" ]]; then
+			$JAVA_HOME/bin/java -jar -D64 $ORACLE_IMAGE -silent -responseFile /tmp/inst_resp -invPtrLoc /tmp/inventory_loc
+		elif [[ ${action:0:1} == "u" ]]; then
+			$ORACLE_HOME/oui/bin/deinstall.sh -silent -responseFile /tmp/uninst_resp
+		elif [[ ${action:0:1} == "d" ]]; then
+			$ORACLE_HOME/oracle_common/common/bin/wlst.sh /tmp/wls_domain.py
+		else
+			usage
+		fi
+	else
+		usage
+	fi
 fi
 
